@@ -1,6 +1,7 @@
 from rest_framework import generics, mixins, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.generics import ListAPIView
 from django.shortcuts import get_object_or_404
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -9,8 +10,10 @@ from .serializers import (
     AuthTokenSerializer,
     StreamSerializer,
     StreamUpdateResponseSerializer,
+    DonationSerializer,
+    # CommentSerializer,
 )
-from core.models import Stream
+from core.models import Stream, Donation, Comment
 
 
 class RegisterView(generics.CreateAPIView):
@@ -47,8 +50,8 @@ class CreateRetrieveStreamView(
     permission_classes = (permissions.IsAuthenticated,)
     queryset = Stream.objects.all()
 
-    def create(self, request, *args, **kwargs):
-        request.data["user"] = request.user.pk
+    def post(self, request, *args, **kwargs):
+        request.data["host"] = request.user.pk
         return super().create(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
@@ -79,3 +82,32 @@ class UpdateStreamView(APIView):
         }
         serializer = StreamUpdateResponseSerializer(response_data)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class CreateRetrieveDonationView(
+    mixins.CreateModelMixin, mixins.RetrieveModelMixin, generics.GenericAPIView
+):
+    serializer_class = DonationSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+    queryset = Donation.objects.all()
+
+    def post(self, request, *args, **kwargs):
+        request.data["user"] = request.user.pk
+        return super().create(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+
+class ListDonationView(ListAPIView):
+    serializer_class = DonationSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get_queryset(self):
+        user = self.request.user
+        stream_id = self.request.query_params.get("stream")
+
+        if stream_id:
+            return Donation.objects.filter(stream__id=stream_id, stream__host=user)
+        else:
+            return Donation.objects.filter(stream__host=user)

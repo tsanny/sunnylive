@@ -1,8 +1,6 @@
 from django.contrib import admin
 
-from . import models
+from .models import Stream, Donation, CustomUser, Comment
 
 
-admin.site.register(models.Stream)
-admin.site.register(models.Donation)
-admin.site.register(models.CustomUser)
+admin.site.register((Stream, Donation, CustomUser, Comment))

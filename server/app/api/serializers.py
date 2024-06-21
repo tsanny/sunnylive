@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from core.models import Stream
+from core.models import Stream, Donation
 
 User = get_user_model()
 
@@ -58,3 +58,13 @@ class StreamUpdateResponseSerializer(serializers.Serializer):
     message = serializers.CharField()
     stream_title = serializers.CharField()
     stream_id = serializers.UUIDField()
+
+
+class DonationSerializer(serializers.ModelSerializer):
+    username = serializers.ReadOnlyField(source="user.username")
+    stream = serializers.CharField(source="stream_id")
+
+    class Meta:
+        model = Donation
+        fields = "__all__"
+        read_only_fields = ("username",)

@@ -14,4 +14,19 @@ urlpatterns = [
     path(
         "streams/<pk>/<action>/", views.UpdateStreamView.as_view(), name="update-stream"
     ),
+    path(
+        "donations/create/",
+        views.CreateRetrieveDonationView.as_view(),
+        name="stream-detail",
+    ),
+    path(
+        "donations/<pk>/",
+        views.CreateRetrieveDonationView.as_view(),
+        name="stream-detail",
+    ),
+    path(
+        "donations/",
+        views.ListDonationView.as_view(),
+        name="stream-detail",
+    ),
 ]

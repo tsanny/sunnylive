@@ -10,10 +10,7 @@ class CustomUser(AbstractUser):
 
 class Stream(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(
-            settings.AUTH_USER_MODEL,
-            on_delete=models.CASCADE
-    )
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     title = models.CharField(max_length=128)
     created_at = models.DateTimeField(auto_now_add=True)
     is_started = models.BooleanField(default=False)
@@ -26,12 +23,12 @@ class Stream(models.Model):
 class Comment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(
-            settings.AUTH_USER_MODEL,
-            on_delete=models.CASCADE,
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
     )
     stream = models.ForeignKey(
-            Stream,
-            on_delete=models.CASCADE,
+        Stream,
+        on_delete=models.CASCADE,
     )
     message = models.CharField(max_length=250)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -28,13 +28,16 @@ class LogoutView(APIView):
 
     def post(self, request):
         try:
-            refresh_token = request.data["refresh_token"]
+            refresh_token = request.data["refresh"]
             token = RefreshToken(refresh_token)
             token.blacklist()
 
-            return Response(status=status.HTTP_205_RESET_CONTENT)
+            return Response(
+                {"message": "Logged out successfully"},
+                status=status.HTTP_205_RESET_CONTENT,
+            )
         except Exception as e:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CreateRetrieveStreamView(
@@ -66,7 +69,7 @@ class UpdateStreamView(APIView):
             message = "Stream ended successfully."
         else:
             return Response(
-                {"detail": "Invalid action"}, status=status.HTTP_400_BAD_REQUEST
+                {"message": "Invalid action"}, status=status.HTTP_400_BAD_REQUEST
             )
         stream.save()
         response_data = {

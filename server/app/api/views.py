@@ -60,8 +60,16 @@ class CreateRetrieveStreamView(
 
 
 class UpdateStreamView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
     def post(self, request, pk, action):
         stream = get_object_or_404(Stream, pk=pk)
+
+        if stream.host != request.user:
+            return Response(
+                {"message": "You do not have permission to modify this stream."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
         if action == "start":
             stream.is_started = True

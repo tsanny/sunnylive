@@ -29,4 +29,14 @@ urlpatterns = [
         views.ListDonationView.as_view(),
         name="stream-detail",
     ),
+    path(
+        "comments/create/",
+        views.CreateRetrieveCommentView.as_view(),
+        name="stream-detail",
+    ),
+    path(
+        "comments/<stream_id>/",
+        views.CreateRetrieveCommentView.as_view(),
+        name="stream-detail",
+    ),
 ]

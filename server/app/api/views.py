@@ -2,6 +2,7 @@ from rest_framework import generics, mixins, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
+from rest_framework.exceptions import NotFound
 from django.shortcuts import get_object_or_404
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -11,7 +12,7 @@ from .serializers import (
     StreamSerializer,
     StreamUpdateResponseSerializer,
     DonationSerializer,
-    # CommentSerializer,
+    CommentSerializer,
 )
 from core.models import Stream, Donation, Comment
 
@@ -111,3 +112,28 @@ class ListDonationView(ListAPIView):
             return Donation.objects.filter(stream__id=stream_id, stream__host=user)
         else:
             return Donation.objects.filter(stream__host=user)
+
+
+class CreateRetrieveCommentView(
+    mixins.CreateModelMixin, mixins.ListModelMixin, generics.GenericAPIView
+):
+    serializer_class = CommentSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get_queryset(self):
+        user = self.request.user
+        stream_id = self.kwargs.get("stream_id")
+
+        queryset = Comment.objects.filter(stream__id=stream_id, stream__host=user)
+
+        if not queryset.exists():
+            raise NotFound("No comments found for the given criteria.")
+
+        return queryset
+
+    def post(self, request, *args, **kwargs):
+        request.data["user"] = request.user.pk
+        return super().create(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)

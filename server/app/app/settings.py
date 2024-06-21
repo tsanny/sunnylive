@@ -33,6 +33,7 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -164,3 +165,6 @@ STATIC_URL = "/static/"
 # Modified User Model
 
 AUTH_USER_MODEL = "core.CustomUser"
+
+
+ASGI_APPLICATION = "app.asgi.application"

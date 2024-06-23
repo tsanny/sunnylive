@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 
-from core.models import Comment
+from core.models import Comment, Stream
 from collections import defaultdict
 
 user_model = get_user_model()
@@ -48,19 +48,23 @@ class CommentConsumer(AsyncWebsocketConsumer):
                 "message": message,
                 "user": {
                     "username": self.user.username,
-                    "id": self.user.id,
+                    "id": str(self.user.id),
                 },
             },
         )
 
     # TODO: REFACTOR
     @sync_to_async
-    def create_message(self, author, channel, content):
-        channel_user = user_model.objects.get(username=channel)
-        if channel_user is None:
+    def create_message(self, user_id, stream_id, content):
+        author = user_model.objects.get(username=user_id)
+        if author is None:
             return None
 
-        return Comment.objects.create(user=author, stream=channel_user, message=content)
+        stream = Stream.objects.get(pk=stream_id)
+        if stream is None:
+            return None
+
+        return Comment.objects.create(user=author, stream=stream, message=content)
 
     async def send_message(self, event):
         await self.send(

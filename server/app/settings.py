@@ -167,4 +167,14 @@ STATIC_URL = "/static/"
 AUTH_USER_MODEL = "core.CustomUser"
 
 
+# Django Channels
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
+
 ASGI_APPLICATION = "app.asgi.application"

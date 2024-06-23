@@ -9,10 +9,14 @@ urlpatterns = [
     path("logout/", views.LogoutView.as_view(), name="token"),
     path("streams/", views.CreateRetrieveStreamView.as_view(), name="new-stream"),
     path(
-        "streams/<pk>/", views.CreateRetrieveStreamView.as_view(), name="stream-detail"
+        "streams/<str:pk>/",
+        views.CreateRetrieveStreamView.as_view(),
+        name="stream-detail",
     ),
     path(
-        "streams/<pk>/<action>/", views.UpdateStreamView.as_view(), name="update-stream"
+        "streams/<str:pk>/<str:action>/",
+        views.UpdateStreamView.as_view(),
+        name="update-stream",
     ),
     path(
         "donations/create/",
@@ -20,7 +24,7 @@ urlpatterns = [
         name="stream-detail",
     ),
     path(
-        "donations/<pk>/",
+        "donations/<str:pk>/",
         views.CreateRetrieveDonationView.as_view(),
         name="stream-detail",
     ),
@@ -35,7 +39,7 @@ urlpatterns = [
         name="stream-detail",
     ),
     path(
-        "comments/<stream_id>/",
+        "comments/<str:stream_id>/",
         views.CreateRetrieveCommentView.as_view(),
         name="stream-detail",
     ),

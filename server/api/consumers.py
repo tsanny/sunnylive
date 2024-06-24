@@ -53,17 +53,16 @@ class CommentConsumer(AsyncWebsocketConsumer):
             },
         )
 
-    # TODO: REFACTOR
     @sync_to_async
     def create_message(self, user_id, stream_id, content):
         author = user_model.objects.get(username=user_id)
         if author is None:
             return None
-
         stream = Stream.objects.get(pk=stream_id)
         if stream is None:
             return None
-
+        if stream.is_ended or not stream.is_started:
+            return None
         return Comment.objects.create(user=author, stream=stream, message=content)
 
     async def send_message(self, event):

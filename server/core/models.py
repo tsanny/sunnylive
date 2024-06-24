@@ -2,6 +2,11 @@ import uuid
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.utils.translation import gettext_lazy as _
+
+
+def generate_stream_key():
+    return str(uuid.uuid4()).replace("-", "")[:16]
 
 
 class CustomUser(AbstractUser):
@@ -15,6 +20,14 @@ class Stream(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     is_started = models.BooleanField(default=False)
     is_ended = models.BooleanField(default=False)
+    stream_key = models.CharField(
+        _("Stream key"),
+        max_length=16,
+        null=False,
+        blank=False,
+        unique=True,
+        default=generate_stream_key,
+    )
 
     def __str__(self):
         return f"{self.title} | {self.host}"

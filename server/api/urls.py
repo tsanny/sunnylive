@@ -9,6 +9,16 @@ urlpatterns = [
     path("logout/", views.LogoutView.as_view(), name="token"),
     path("streams/", views.CreateRetrieveStreamView.as_view(), name="new-stream"),
     path(
+        "streams/auth/",
+        views.StreamAuthView.as_view(),
+        name="start-stream",
+    ),
+    path(
+        "streams/done/",
+        views.StreamDoneView.as_view(),
+        name="end-stream",
+    ),
+    path(
         "streams/<str:pk>/",
         views.CreateRetrieveStreamView.as_view(),
         name="stream-detail",

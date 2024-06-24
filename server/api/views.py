@@ -4,6 +4,8 @@ from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from rest_framework.exceptions import NotFound
 from django.shortcuts import get_object_or_404
+from django.http import HttpResponseRedirect
+from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import (
@@ -15,6 +17,8 @@ from .serializers import (
     CommentSerializer,
 )
 from core.models import Stream, Donation, Comment
+
+User = get_user_model()
 
 
 class RegisterView(generics.CreateAPIView):
@@ -91,6 +95,56 @@ class UpdateStreamView(APIView):
         }
         serializer = StreamUpdateResponseSerializer(response_data)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class StreamAuthView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        data = request.data
+        addr = data.get("addr")
+        flashver = data.get("flashver")
+        call = data.get("call")
+        stream_key = data.get("name")
+
+        if addr == "127.0.0.1" and flashver == "LNX.11,1,102,55":
+            return Response(status=status.HTTP_200_OK)
+
+        if not call or call != "publish" or not stream_key:
+            return Response(
+                {"message": "Stream authorization failed"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        try:
+            stream = Stream.objects.get(stream_key=stream_key)
+            if not stream:
+                return Response(
+                    {"message": "Stream authorization failed"},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+        except Stream.DoesNotExist:
+            return Response(
+                {"message": "Stream authorization failed"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        HttpResponseRedirect.allowed_schemes.append("rtmp")
+        return HttpResponseRedirect(
+            redirect_to=f"rtmp://127.0.0.1/live/{stream.id}",
+            status=status.HTTP_302_FOUND,
+        )
+
+
+class StreamDoneView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        data = request.data
+
+        print("RTMP Stream stopped successfully.")
+        print(data)
+        return Response(status=status.HTTP_200_OK)
 
 
 class CreateRetrieveDonationView(

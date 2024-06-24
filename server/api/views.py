@@ -97,6 +97,18 @@ class UpdateStreamView(APIView):
 class StreamAuthView(APIView):
     permission_classes = [permissions.AllowAny]
 
+    def get(self, request):
+        stream_id = self.request.query_params.get("stream_id")
+        if not stream_id:
+            return Response(
+                {"detail": "Stream query parameter is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        stream = get_object_or_404(Stream, pk=stream_id)
+        if stream.is_started and not stream.is_ended:
+            return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_403_FORBIDDEN)
+
     def post(self, request):
         data = request.data
         addr = data.get("addr")

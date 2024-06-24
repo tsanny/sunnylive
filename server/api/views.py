@@ -1,13 +1,13 @@
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponseRedirect
 from rest_framework import generics, mixins, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from rest_framework.exceptions import NotFound
-from django.shortcuts import get_object_or_404
-from django.http import HttpResponseRedirect
-from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
+from core.models import Stream, Donation, Comment
 from .serializers import (
     UserSerializer,
     AuthTokenSerializer,
@@ -16,9 +16,6 @@ from .serializers import (
     DonationSerializer,
     CommentSerializer,
 )
-from core.models import Stream, Donation, Comment
-
-User = get_user_model()
 
 
 class RegisterView(generics.CreateAPIView):
@@ -129,6 +126,7 @@ class StreamAuthView(APIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
+        print("redirecting to", f"rtmp://127.0.0.1/live/{stream.id}")
         HttpResponseRedirect.allowed_schemes.append("rtmp")
         return HttpResponseRedirect(
             redirect_to=f"rtmp://127.0.0.1/live/{stream.id}",

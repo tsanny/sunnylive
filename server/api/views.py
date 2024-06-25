@@ -169,6 +169,19 @@ class CreateRetrieveDonationView(
 
     def post(self, request, *args, **kwargs):
         request.data["user"] = request.user.pk
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            request.data["stream"],
+            {
+                "type": "send_donation",
+                "message": request.data["message"],
+                "amount": request.data["amount"],
+                "user": {
+                    "username": request.user.username,
+                    "id": str(request.user.id),
+                },
+            },
+        )
         return super().create(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):

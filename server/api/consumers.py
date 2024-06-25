@@ -29,45 +29,63 @@ class CommentConsumer(AsyncWebsocketConsumer):
         CommentConsumer.connected_clients[self.group_name].remove(self.user.username)
         await self.send_group_connected_clients()
 
-    async def receive(self, text_data):
-        text_data_json = json.loads(text_data)
-        message = text_data_json["message"]
+    # May not be needed since we're submitting comments from http POST endpoint
 
-        if not await self.valid_message(self.user, self.group_name, message):
-            return
-
-        # Prevent anonymous users from sending messages
-        if self.user.is_anonymous:
-            return
-
-        await self.channel_layer.group_send(
-            self.group_name,
-            {
-                "type": "send_message",
-                "message": message,
-                "user": {
-                    "username": self.user.username,
-                    "id": str(self.user.id),
-                },
-            },
-        )
-
-    @sync_to_async
-    def valid_message(self, user_id, stream_id, content):
-        author = user_model.objects.get(username=user_id)
-        if author is None:
-            return False
-        stream = Stream.objects.get(pk=stream_id)
-        if stream is None:
-            return False
-        if stream.is_ended or not stream.is_started:
-            return False
-        return True
+    # async def receive(self, text_data):
+    #     text_data_json = json.loads(text_data)
+    #     message = text_data_json["message"]
+    #
+    #     if not await self.valid_message(self.user, self.group_name, message):
+    #         return
+    #
+    #     # Prevent anonymous users from sending messages
+    #     if self.user.is_anonymous:
+    #         return
+    #
+    #     await self.channel_layer.group_send(
+    #         self.group_name,
+    #         {
+    #             "type": "send_message",
+    #             "message": message,
+    #             "user": {
+    #                 "username": self.user.username,
+    #                 "id": str(self.user.id),
+    #             },
+    #         },
+    #     )
+    #
+    # @sync_to_async
+    # def valid_message(self, user_id, stream_id, content):
+    #     author = user_model.objects.get(username=user_id)
+    #     if author is None:
+    #         return False
+    #     stream = Stream.objects.get(pk=stream_id)
+    #     if stream is None:
+    #         return False
+    #     if stream.is_ended or not stream.is_started:
+    #         return False
+    #     return True
 
     async def send_message(self, event):
         await self.send(
             text_data=json.dumps(
-                {"message": event["message"], "username": event["user"]["username"]}
+                {
+                    "is_donation": False,
+                    "message": event["message"],
+                    "username": event["user"]["username"],
+                }
+            )
+        )
+
+    async def send_donation(self, event):
+        await self.send(
+            text_data=json.dumps(
+                {
+                    "is_donation": True,
+                    "message": event["message"],
+                    "amount": event["amount"],
+                    "username": event["user"]["username"],
+                }
             )
         )
 

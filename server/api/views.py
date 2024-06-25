@@ -1,3 +1,5 @@
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect
 from rest_framework import generics, mixins, permissions, status
@@ -8,6 +10,7 @@ from rest_framework.exceptions import NotFound
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
 from core.models import Stream, Donation, Comment
+from .consumers import CommentConsumer
 from .serializers import (
     UserSerializer,
     AuthTokenSerializer,
@@ -205,6 +208,18 @@ class CreateRetrieveCommentView(
 
     def post(self, request, *args, **kwargs):
         request.data["user"] = request.user.pk
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            request.data["stream"],
+            {
+                "type": "send_message",
+                "message": request.data["message"],
+                "user": {
+                    "username": request.user.username,
+                    "id": str(request.user.id),
+                },
+            },
+        )
         return super().create(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):

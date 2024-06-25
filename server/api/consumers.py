@@ -33,8 +33,7 @@ class CommentConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         message = text_data_json["message"]
 
-        message_obj = await self.create_message(self.user, self.group_name, message)
-        if not message_obj:
+        if not await self.valid_message(self.user, self.group_name, message):
             return
 
         # Prevent anonymous users from sending messages
@@ -54,16 +53,16 @@ class CommentConsumer(AsyncWebsocketConsumer):
         )
 
     @sync_to_async
-    def create_message(self, user_id, stream_id, content):
+    def valid_message(self, user_id, stream_id, content):
         author = user_model.objects.get(username=user_id)
         if author is None:
-            return None
+            return False
         stream = Stream.objects.get(pk=stream_id)
         if stream is None:
-            return None
+            return False
         if stream.is_ended or not stream.is_started:
-            return None
-        return Comment.objects.create(user=author, stream=stream, message=content)
+            return False
+        return True
 
     async def send_message(self, event):
         await self.send(

@@ -1,16 +1,13 @@
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect
 from rest_framework import generics, mixins, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView
 from rest_framework.exceptions import NotFound
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
 from core.models import Stream, Donation, Comment
-from .consumers import CommentConsumer
+from .utils import send_message_to_channel
 from .serializers import (
     UserSerializer,
     AuthTokenSerializer,
@@ -141,7 +138,6 @@ class StreamAuthView(APIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        print("redirecting to", f"rtmp://127.0.0.1/live/{stream.id}")
         HttpResponseRedirect.allowed_schemes.append("rtmp")
         return HttpResponseRedirect(
             redirect_to=f"rtmp://127.0.0.1/live/{stream.id}",
@@ -160,53 +156,38 @@ class StreamDoneView(APIView):
         return Response(status=status.HTTP_200_OK)
 
 
-class CreateRetrieveDonationView(
-    mixins.CreateModelMixin, mixins.RetrieveModelMixin, generics.GenericAPIView
-):
-    serializer_class = DonationSerializer
+class CreateBaseView(generics.CreateAPIView):
     permission_classes = (permissions.IsAuthenticated,)
-    queryset = Donation.objects.all()
 
     def post(self, request, *args, **kwargs):
         request.data["user"] = request.user.pk
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            request.data["stream"],
-            {
-                "type": "send_donation",
-                "message": request.data["message"],
-                "amount": request.data["amount"],
-                "user": {
-                    "username": request.user.username,
-                    "id": str(request.user.id),
-                },
-            },
+        send_message_to_channel(
+            stream=request.data["stream"],
+            message_type=self.message_type,
+            message=request.data["message"],
+            user=request.user,
+            amount=request.data.get("amount"),
         )
         return super().create(request, *args, **kwargs)
 
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
 
-
-class ListDonationView(ListAPIView):
-    serializer_class = DonationSerializer
-    permission_classes = (permissions.IsAuthenticated,)
-
-    def get_queryset(self):
-        user = self.request.user
-        stream_id = self.request.query_params.get("stream")
-
-        if stream_id:
-            return Donation.objects.filter(stream__id=stream_id, stream__host=user)
-        else:
-            return Donation.objects.filter(stream__host=user)
-
-
-class CreateRetrieveCommentView(
-    mixins.CreateModelMixin, mixins.ListModelMixin, generics.GenericAPIView
-):
+class CreateCommentView(CreateBaseView):
     serializer_class = CommentSerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    message_type = "send_message"
+
+
+class CreateDonationView(CreateBaseView):
+    serializer_class = DonationSerializer
+    message_type = "send_donation"
+
+
+class RetrieveDonationView(generics.RetrieveAPIView):
+    serializer_class = DonationSerializer
+    queryset = Donation.objects.all()
+
+
+class ListCommentView(generics.ListAPIView):
+    serializer_class = CommentSerializer
 
     def get_queryset(self):
         user = self.request.user
@@ -219,21 +200,15 @@ class CreateRetrieveCommentView(
 
         return queryset
 
-    def post(self, request, *args, **kwargs):
-        request.data["user"] = request.user.pk
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            request.data["stream"],
-            {
-                "type": "send_message",
-                "message": request.data["message"],
-                "user": {
-                    "username": request.user.username,
-                    "id": str(request.user.id),
-                },
-            },
-        )
-        return super().create(request, *args, **kwargs)
 
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
+class ListDonationView(generics.ListAPIView):
+    serializer_class = DonationSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        stream_id = self.request.query_params.get("stream")
+
+        if stream_id:
+            return Donation.objects.filter(stream__id=stream_id, stream__host=user)
+        else:
+            return Donation.objects.filter(stream__host=user)

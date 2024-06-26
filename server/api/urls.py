@@ -13,11 +13,6 @@ urlpatterns = [
         views.StreamAuthView.as_view(),
         name="start-stream",
     ),
-    # path(
-    #     "streams/auth/<str:pk>/",
-    #     views.StreamAuthView.as_view(),
-    #     name="auth-stream",
-    # ),
     path(
         "streams/done/",
         views.StreamDoneView.as_view(),
@@ -35,12 +30,12 @@ urlpatterns = [
     ),
     path(
         "donations/create/",
-        views.CreateRetrieveDonationView.as_view(),
+        views.CreateDonationView.as_view(),
         name="create-donation",
     ),
     path(
         "donations/<str:pk>/",
-        views.CreateRetrieveDonationView.as_view(),
+        views.RetrieveDonationView.as_view(),
         name="donation-detail",
     ),
     path(
@@ -50,12 +45,12 @@ urlpatterns = [
     ),
     path(
         "comments/create/",
-        views.CreateRetrieveCommentView.as_view(),
+        views.CreateCommentView.as_view(),
         name="create-comment",
     ),
     path(
         "comments/<str:stream_id>/",
-        views.CreateRetrieveCommentView.as_view(),
+        views.ListCommentView.as_view(),
         name="list-stream-comments",
     ),
 ]

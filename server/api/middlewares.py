@@ -16,10 +16,7 @@ User = get_user_model()
 @database_sync_to_async
 def get_user(validated_token):
     try:
-        print(f"Token: {validated_token}")
         user = User.objects.get(id=validated_token["user_id"])
-        # return get_user_model().objects.get(id=toke_id)
-        print(f"User: {user}")
         return user
 
     except User.DoesNotExist:

@@ -1,4 +1,15 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+import dotenv from "dotenv";
+
+if (process.env.NODE_ENV === "development") {
+  dotenv.config({ path: "../.env" });
+}
+
+const nextConfig = {
+  reactStrictMode: true,
+  images: {
+    domains: ["localhost", "ui-avatars.com"],
+  },
+};
 
 export default nextConfig;

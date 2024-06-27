@@ -1,13 +1,14 @@
 from django.urls import path
-
+from rest_framework_simplejwt.views import TokenRefreshView
 from . import views
 
 
 urlpatterns = [
     path("register/", views.RegisterView.as_view(), name="register"),
     path("login/", views.CreateTokenView.as_view(), name="token"),
+    path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("logout/", views.LogoutView.as_view(), name="token"),
-    path("streams/", views.CreateRetrieveStreamView.as_view(), name="new-stream"),
+    path("streams/", views.CreateStreamView.as_view(), name="new-stream"),
     path(
         "streams/auth/",
         views.StreamAuthView.as_view(),
@@ -20,7 +21,7 @@ urlpatterns = [
     ),
     path(
         "streams/<str:pk>/",
-        views.CreateRetrieveStreamView.as_view(),
+        views.RetrieveStreamView.as_view(),
         name="stream-detail",
     ),
     path(

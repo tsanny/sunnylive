@@ -14,12 +14,27 @@ class AuthTokenSerializer(TokenObtainPairSerializer):
 
         return token
 
+    def validate(self, attrs):
+        data = super(AuthTokenSerializer, self).validate(attrs)
+        data.update(
+            {
+                "user": {
+                    "id": self.user.id,
+                    "username": self.user.username,
+                    "emai": self.user.email,
+                }
+            }
+        )
+        return data
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ("id", "username", "password")
-        extra_kwargs = {"password": {"write_only": True, "min_length": 8}}
+        fields = ("id", "username", "email", "password")
+        extra_kwargs = {
+            "password": {"write_only": True, "min_length": 8},
+        }
 
     def create(self, validated_data):
         password = validated_data.pop("password")
@@ -37,6 +52,15 @@ class UserSerializer(serializers.ModelSerializer):
             user.save()
 
         return user
+
+    def to_representation(self, instance):
+        return {
+            "user": {
+                "id": instance.id,
+                "email": instance.email,
+                "username": instance.username,
+            }
+        }
 
 
 class StreamSerializer(serializers.ModelSerializer):

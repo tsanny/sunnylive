@@ -45,9 +45,7 @@ class LogoutView(APIView):
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class CreateRetrieveStreamView(
-    mixins.CreateModelMixin, mixins.RetrieveModelMixin, generics.GenericAPIView
-):
+class CreateStreamView(generics.CreateAPIView):
     serializer_class = StreamSerializer
     permission_classes = (permissions.IsAuthenticated,)
     queryset = Stream.objects.all()
@@ -55,6 +53,12 @@ class CreateRetrieveStreamView(
     def post(self, request, *args, **kwargs):
         request.data["host"] = request.user.pk
         return super().create(request, *args, **kwargs)
+
+
+class RetrieveStreamView(generics.RetrieveAPIView):
+    serializer_class = StreamSerializer
+    permission_classes = (permissions.AllowAny,)
+    queryset = Stream.objects.all()
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)

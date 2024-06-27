@@ -1,18 +1,29 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { getUserAvatar, getUsernameColor } from "@/lib/utils";
 import { Badge } from "./ui/badge";
 import Image from "next/image";
-import { useUser } from "@/context/user.context";
 
 import useSWR from "swr";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { Input } from "./ui/input";
 import useKeypress from "@/hooks/use-key-press";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Label } from "@radix-ui/react-dropdown-menu";
 
 type Message = {
+  is_donation: boolean;
   message: string;
   username: string;
+  amount?: number;
 };
 
 const fetcher = (url: string) =>
@@ -34,10 +45,19 @@ export function Chat({
   };
 
   const [viewers, setViewers] = useState(0);
-  const { user } = useUser();
-
+  const [openDonation, setOpenDonation] = React.useState(false);
   const [messageHistory, setMessageHistory] = useState<Message[]>([]);
+  const [formattedAmount, setFormattedAmount] = useState("");
   const messageRef = useRef<HTMLInputElement>(null);
+  const donationMessageRef = useRef<HTMLInputElement>(null);
+  const donationAmountRef = useRef<HTMLInputElement>(null);
+
+  const handleAmountFormat = (e: any) => {
+    const value = e.target.value.replace(/,/g, "");
+    if (!isNaN(value) && value.length <= 10) {
+      setFormattedAmount(Number(value).toLocaleString());
+    }
+  };
 
   const { data, error, isLoading } = useSWR("/api/refresh-token/", fetcher);
 
@@ -63,6 +83,23 @@ export function Chat({
     messageRef.current!.value = "";
   };
 
+  const handleSendDonation = async () => {
+    const message = donationMessageRef.current?.value;
+    const amount = Number(donationAmountRef.current?.value.replace(/,/g, ""));
+
+    const stream = stream_id;
+    fetch(`/api/donations/`, {
+      body: JSON.stringify({ stream, message, amount }),
+    });
+    handleCloseDonationDialog();
+  };
+
+  const handleCloseDonationDialog = () => {
+    setOpenDonation(false);
+    donationMessageRef.current!.value = "";
+    setFormattedAmount("");
+  };
+
   useEffect(() => {
     if (lastMessage) {
       const newMessage = JSON.parse(lastMessage.data);
@@ -84,76 +121,142 @@ export function Chat({
   const isAuthenticated = data && !data?.data?.access;
 
   return (
-    <div className="flex-col hidden md:flex min-h-full bg-gray-900 border-l border-gray-800">
-      <div className="flex flex-row items-center justify-between p-4 border-b border-gray-800">
-        <div className="flex flex-row items-center gap-2">
-          <Image
-            src={getUserAvatar(username.slice(1))}
-            alt="User avatar"
-            width={32}
-            height={32}
-            className="rounded-full"
-          />
-          <div className="flex flex-col">
-            <div className="flex flex-row space-x-2 items-center">
-              <span className="text-sm font-bold">{username}</span>
-              {isStreaming && <Badge variant="destructive">Live</Badge>}
+    <>
+      <div className="flex-col hidden md:flex min-h-full bg-gray-900 border-l border-gray-800">
+        <div className="flex flex-row items-center justify-between p-4 border-b border-gray-800">
+          <div className="flex flex-row items-center gap-2">
+            <Image
+              src={getUserAvatar(username.slice(1))}
+              alt="User avatar"
+              width={32}
+              height={32}
+              className="rounded-full"
+            />
+            <div className="flex flex-col">
+              <div className="flex flex-row space-x-2 items-center">
+                <span className="text-sm font-bold">{username}</span>
+                {isStreaming && <Badge variant="destructive">Live</Badge>}
+              </div>
+              <span className="text-xs text-gray-500 transition-all duration-300">
+                {formatViewers(viewers)} watching
+              </span>
             </div>
-            <span className="text-xs text-gray-500 transition-all duration-300">
-              {formatViewers(viewers)} watching
+          </div>
+        </div>
+        <ul className="flex flex-col flex-grow overflow-y-auto p-2">
+          {connectionStatus === "Open" || isLoading ? (
+            messageHistory.map((messageData, idx) => (
+              <li
+                key={idx}
+                className="flex flex-row items-center justify-between py-0.5"
+              >
+                {messageData.is_donation ? (
+                  <div className="flex flex-col flex-grow">
+                    <div className="flex flex-col bg-emerald-500 p-1.5 rounded-t-md">
+                      <span className={`text-xs font-bold text-zinc-900}`}>
+                        {messageData.username}
+                      </span>
+                      <span className={`text-xs font-bold text-gray-50`}>
+                        Rp. {Number(messageData.amount).toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="flex flex-row bg-emerald-400 p-1.5 pb-2 rounded-b-md">
+                      <span
+                        className="text-xs text-gray-800 transition-all duration-300 flex flex-row items-center"
+                        dangerouslySetInnerHTML={{
+                          __html: messageData.message,
+                        }}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-row items-center gap-2">
+                    <div className="flex flex-row items-center space-x-2">
+                      <span
+                        className={`text-xs font-bold ${getUsernameColor(messageData.username)}`}
+                      >
+                        {messageData.username}
+                      </span>
+                      <span
+                        className="text-xs text-gray-500 transition-all duration-300 flex flex-row items-center"
+                        dangerouslySetInnerHTML={{
+                          __html: messageData.message,
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </li>
+            ))
+          ) : error ? (
+            <span className="text-sm text-gray-500 p-4">
+              An error occurred while connecting to chat.
             </span>
+          ) : (
+            <span className="text-sm text-gray-500 p-4">
+              {connectionStatus}...
+            </span>
+          )}
+        </ul>
+        <div className="flex flex-col items-center justify-between gap-2 p-4 border-t border-gray-800 w-max-[120px]">
+          <Input
+            placeholder="Type message"
+            disabled={isAuthenticated}
+            ref={messageRef}
+          />
+          <div className="flex justify-between space-x-24">
+            <button
+              className="flex flex-row items-center justify-center bg-green-600 text-white px-4 py-1 rounded-md outline-none"
+              disabled={isAuthenticated}
+              onClick={() => setOpenDonation(!openDonation)}
+            >
+              $
+            </button>
+            <button
+              className="flex flex-row items-center justify-center bg-purple-600 text-white px-4 py-1 rounded-md outline-none"
+              disabled={isAuthenticated}
+              onClick={() => handleSendMessage()}
+            >
+              Send
+            </button>
           </div>
         </div>
       </div>
-      <ul className="flex flex-col flex-grow overflow-y-auto p-2">
-        {connectionStatus === "Open" || isLoading ? (
-          messageHistory.map((messageData, idx) => (
-            <li
-              key={idx}
-              className="flex flex-row items-center justify-between py-0.5"
+      <AlertDialog open={openDonation}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Send a Donation to {username}</AlertDialogTitle>
+            <AlertDialogDescription>
+              Show your support to {username} by sending them a donation
+              <Label className="mt-4">Amount</Label>
+              <Input
+                type="text"
+                ref={donationAmountRef}
+                placeholder="Donation amount"
+                value={formattedAmount}
+                onChange={handleAmountFormat}
+              />
+              <Label className="mt-4">Message</Label>
+              <Input
+                type="text"
+                ref={donationMessageRef}
+                placeholder="Send a message"
+              />
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => handleCloseDonationDialog()}>
+              Cancel
+            </AlertDialogAction>
+            <AlertDialogAction
+              className="bg-purple-600 text-white"
+              onClick={() => handleSendDonation()}
             >
-              <div className="flex flex-row items-center gap-2">
-                <div className="flex flex-row items-center space-x-2">
-                  <span
-                    className={`text-xs font-bold ${getUsernameColor(messageData.username)}`}
-                  >
-                    {messageData.username}
-                  </span>
-                  <span
-                    className="text-xs text-gray-500 transition-all duration-300 flex flex-row items-center"
-                    dangerouslySetInnerHTML={{
-                      __html: messageData.message,
-                    }}
-                  />
-                </div>
-              </div>
-            </li>
-          ))
-        ) : error ? (
-          <span className="text-sm text-gray-500 p-4">
-            An error occurred while connecting to chat.
-          </span>
-        ) : (
-          <span className="text-sm text-gray-500 p-4">
-            {connectionStatus}...
-          </span>
-        )}
-      </ul>
-      <div className="flex flex-row items-center justify-between gap-2 p-4 border-t border-gray-800 w-max-[120px]">
-        <Input
-          type="text"
-          placeholder="Type message"
-          disabled={isAuthenticated}
-          ref={messageRef}
-        />
-        <button
-          className="flex flex-row items-center justify-center bg-purple-600 text-white px-4 py-2 rounded-md outline-none"
-          disabled={isAuthenticated}
-          onClick={() => handleSendMessage()}
-        >
-          Send
-        </button>
-      </div>
-    </div>
+              Send
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

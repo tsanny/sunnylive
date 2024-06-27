@@ -1,3 +1,4 @@
+from .tasks import create_object
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect
 from rest_framework import generics, permissions, status
@@ -193,6 +194,7 @@ class CreateBaseView(generics.CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         request.data["user"] = request.user.pk
+
         if self.message_type == "send_donation":
             send_message_to_channel(
                 stream=request.data["stream"],
@@ -201,7 +203,9 @@ class CreateBaseView(generics.CreateAPIView):
                 user=request.user,
                 amount=request.data.get("amount"),
             )
-        return super().create(request, *args, **kwargs)
+
+        create_object.delay(self.message_type, request.data)
+        return Response(status=status.HTTP_200_OK)
 
 
 class CreateCommentView(CreateBaseView):

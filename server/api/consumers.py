@@ -2,8 +2,10 @@ import json
 from collections import defaultdict
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.contrib.auth import get_user_model
+from asgiref.sync import sync_to_async
+from core.models import Stream
 
-user_model = get_user_model()
+User = get_user_model()
 
 
 class CommentConsumer(AsyncWebsocketConsumer):
@@ -28,40 +30,40 @@ class CommentConsumer(AsyncWebsocketConsumer):
 
     # May not be needed since we're submitting comments from http POST endpoint
 
-    # async def receive(self, text_data):
-    #     text_data_json = json.loads(text_data)
-    #     message = text_data_json["message"]
-    #
-    #     if not await self.valid_message(self.user, self.group_name, message):
-    #         return
-    #
-    #     # Prevent anonymous users from sending messages
-    #     if self.user.is_anonymous:
-    #         return
-    #
-    #     await self.channel_layer.group_send(
-    #         self.group_name,
-    #         {
-    #             "type": "send_message",
-    #             "message": message,
-    #             "user": {
-    #                 "username": self.user.username,
-    #                 "id": str(self.user.id),
-    #             },
-    #         },
-    #     )
-    #
-    # @sync_to_async
-    # def valid_message(self, user_id, stream_id, content):
-    #     author = user_model.objects.get(username=user_id)
-    #     if author is None:
-    #         return False
-    #     stream = Stream.objects.get(pk=stream_id)
-    #     if stream is None:
-    #         return False
-    #     if stream.is_ended or not stream.is_started:
-    #         return False
-    #     return True
+    async def receive(self, text_data):
+        text_data_json = json.loads(text_data)
+        message = text_data_json["message"]
+
+        if not await self.valid_message(self.user, self.group_name, message):
+            return
+
+        # Prevent anonymous users from sending messages
+        if self.user.is_anonymous:
+            return
+
+        await self.channel_layer.group_send(
+            self.group_name,
+            {
+                "type": "send_message",
+                "message": message,
+                "user": {
+                    "username": self.user.username,
+                    "id": str(self.user.id),
+                },
+            },
+        )
+
+    @sync_to_async
+    def valid_message(self, user_id, stream_id, content):
+        author = User.objects.get(username=user_id)
+        if author is None:
+            return False
+        stream = Stream.objects.get(pk=stream_id)
+        if stream is None:
+            return False
+        if stream.is_ended or not stream.is_started:
+            return False
+        return True
 
     async def send_message(self, event):
         await self.send(

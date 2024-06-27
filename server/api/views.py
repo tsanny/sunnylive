@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
-from core.models import Stream, Donation, Comment
+from core.models import Stream, Donation, Comment, CustomUser
 from .utils import send_message_to_channel
 from .serializers import (
     UserSerializer,
@@ -27,6 +27,18 @@ class CreateTokenView(TokenObtainPairView):
     """Create a new auth token for user"""
 
     serializer_class = AuthTokenSerializer
+
+
+class CurrentUserView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request):
+        return Response(UserSerializer(request.user).data)
+
+
+class RetrieveUserView(generics.RetrieveAPIView):
+    serializer_class = UserSerializer
+    queryset = CustomUser.objects.all()
 
 
 class LogoutView(APIView):
@@ -181,13 +193,14 @@ class CreateBaseView(generics.CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         request.data["user"] = request.user.pk
-        send_message_to_channel(
-            stream=request.data["stream"],
-            message_type=self.message_type,
-            message=request.data["message"],
-            user=request.user,
-            amount=request.data.get("amount"),
-        )
+        if self.message_type == "send_donation":
+            send_message_to_channel(
+                stream=request.data["stream"],
+                message_type=self.message_type,
+                message=request.data["message"],
+                user=request.user,
+                amount=request.data.get("amount"),
+            )
         return super().create(request, *args, **kwargs)
 
 

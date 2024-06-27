@@ -8,6 +8,8 @@ urlpatterns = [
     path("login/", views.CreateTokenView.as_view(), name="token"),
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("logout/", views.LogoutView.as_view(), name="token"),
+    path("user/", views.CurrentUserView.as_view(), name="user"),
+    path("user/<str:pk>/", views.RetrieveUserView.as_view(), name="user"),
     path("streams/", views.CreateStreamView.as_view(), name="new-stream"),
     path(
         "streams/auth/",

@@ -25,6 +25,11 @@ urlpatterns = [
         name="stream-detail",
     ),
     path(
+        "streams/<str:pk>/key/",
+        views.RetrieveStreamKeyView.as_view(),
+        name="stream-key",
+    ),
+    path(
         "streams/<str:pk>/<str:action>/",
         views.UpdateStreamView.as_view(),
         name="update-stream",

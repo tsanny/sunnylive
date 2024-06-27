@@ -64,12 +64,18 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class StreamSerializer(serializers.ModelSerializer):
-    username = serializers.ReadOnlyField(source="user.username")
+    username = serializers.ReadOnlyField(source="host.username")
 
     class Meta:
         model = Stream
-        fields = "__all__"
         read_only_fields = ("username",)
+        exclude = ("stream_key",)
+
+
+class StreamKeySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Stream
+        fields = ("stream_key",)
 
 
 class StartStreamSerializer(serializers.ModelSerializer):

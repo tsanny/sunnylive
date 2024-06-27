@@ -1,9 +1,9 @@
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect
-from rest_framework import generics, mixins, permissions, status
+from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
 from core.models import Stream, Donation, Comment
@@ -12,6 +12,7 @@ from .serializers import (
     UserSerializer,
     AuthTokenSerializer,
     StreamSerializer,
+    StreamKeySerializer,
     StreamUpdateResponseSerializer,
     DonationSerializer,
     CommentSerializer,
@@ -59,6 +60,21 @@ class RetrieveStreamView(generics.RetrieveAPIView):
     serializer_class = StreamSerializer
     permission_classes = (permissions.AllowAny,)
     queryset = Stream.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+
+class RetrieveStreamKeyView(generics.RetrieveAPIView):
+    serializer_class = StreamKeySerializer
+    permission_classes = (permissions.IsAuthenticated,)
+    queryset = Stream.objects.all()
+
+    def get_object(self):
+        obj = super().get_object()
+        if obj.host != self.request.user:
+            raise PermissionDenied("You are not the host of this stream.")
+        return obj
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)

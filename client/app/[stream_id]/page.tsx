@@ -2,6 +2,7 @@
 import { Chat } from "@/components/chat";
 import { VideoPlayer } from "@/components/video-player";
 import { useEffect, useState } from "react";
+import { useUser } from "@/context/user.context";
 
 export default function Page({
   params,
@@ -12,6 +13,7 @@ export default function Page({
 }) {
   let stream_id = decodeURIComponent(params.stream_id);
 
+  const { user } = useUser();
   const [isStreaming, setIsStreaming] = useState(false);
   const [username, setUsername] = useState("");
 
@@ -48,7 +50,8 @@ export default function Page({
       <div className="flex flex-row w-full h-full">
         <VideoPlayer stream_id={stream_id} isStreaming={isStreaming} />
         <Chat
-          username={username.trim()}
+          host_username={username.trim()}
+          viewer_username={user?.username}
           stream_id={stream_id}
           isStreaming={isStreaming}
         />

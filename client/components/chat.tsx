@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { getUserAvatar, getUsernameColor } from "@/lib/utils";
 import { Badge } from "./ui/badge";
 import Image from "next/image";
-
+import { Icons } from "@/components/icons";
 import useSWR from "swr";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { Input } from "./ui/input";
@@ -32,11 +32,13 @@ const fetcher = (url: string) =>
   }).then((res) => res.json());
 
 export function Chat({
-  username,
+  host_username,
+  viewer_username,
   stream_id,
   isStreaming,
 }: {
-  username: string;
+  host_username: string;
+  viewer_username?: string;
   stream_id: string;
   isStreaming: boolean;
 }) {
@@ -45,7 +47,10 @@ export function Chat({
   };
 
   const [viewers, setViewers] = useState(0);
+  const [streamKey, setStreamKey] = useState("");
   const [openDonation, setOpenDonation] = React.useState(false);
+  const [openStreamKey, setOpenStreamKey] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
   const [messageHistory, setMessageHistory] = useState<Message[]>([]);
   const [formattedAmount, setFormattedAmount] = useState("");
   const messageRef = useRef<HTMLInputElement>(null);
@@ -56,6 +61,17 @@ export function Chat({
     const value = e.target.value.replace(/,/g, "");
     if (!isNaN(value) && value.length <= 10) {
       setFormattedAmount(Number(value).toLocaleString());
+    }
+  };
+
+  const fetchStreamKey = async () => {
+    let response;
+    response = await fetch(`/api/streams/${stream_id}/key/`, {
+      method: "GET",
+    });
+    if (response.status === 200) {
+      const data = (await response.json()).data;
+      setStreamKey(data.stream_key);
     }
   };
 
@@ -94,6 +110,15 @@ export function Chat({
     handleCloseDonationDialog();
   };
 
+  const handleOpenStreamKeyDialog = () => {
+    setOpenStreamKey(true);
+    if (streamKey == "") {
+      setLoading(true);
+      fetchStreamKey();
+      setLoading(false);
+    }
+  };
+
   const handleCloseDonationDialog = () => {
     setOpenDonation(false);
     donationMessageRef.current!.value = "";
@@ -126,7 +151,7 @@ export function Chat({
         <div className="flex flex-row items-center justify-between p-4 border-b border-gray-800">
           <div className="flex flex-row items-center gap-2">
             <Image
-              src={getUserAvatar(username.slice(1))}
+              src={getUserAvatar(host_username)}
               alt="User avatar"
               width={32}
               height={32}
@@ -134,7 +159,7 @@ export function Chat({
             />
             <div className="flex flex-col">
               <div className="flex flex-row space-x-2 items-center">
-                <span className="text-sm font-bold">{username}</span>
+                <span className="text-sm font-bold">{host_username}</span>
                 {isStreaming && <Badge variant="destructive">Live</Badge>}
               </div>
               <span className="text-xs text-gray-500 transition-all duration-300">
@@ -143,6 +168,59 @@ export function Chat({
             </div>
           </div>
         </div>
+
+        {host_username === viewer_username && (
+          <>
+            <div className="flex flex-row items-center justify-between p-4 border-b border-gray-800">
+              <div className="flex justify-between space-x-24">
+                <button
+                  className="flex flex-row items-center justify-center bg-green-600 text-white px-4 py-1 rounded-md outline-none"
+                  disabled={isAuthenticated}
+                  onClick={() => setOpenDonation(!openDonation)}
+                >
+                  <Icons.play className="pr-1" />
+                  Start
+                </button>
+                <button
+                  className="flex flex-row items-center justify-center bg-zinc-800 text-white px-4 py-1 rounded-md outline-none"
+                  disabled={isAuthenticated}
+                  onClick={() => handleOpenStreamKeyDialog()}
+                >
+                  <Icons.key />
+                </button>
+              </div>
+            </div>
+            <AlertDialog open={openStreamKey}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{viewer_username} Profile</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Here is your stream key, you can use it to stream to your
+                    channel.
+                    <Label className="mt-4">Stream key</Label>
+                    {loading ? (
+                      <p>Loading...</p>
+                    ) : (
+                      <Input
+                        type="text"
+                        id="streamKey"
+                        placeholder="Stream Key"
+                        disabled
+                        value={streamKey}
+                      />
+                    )}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogAction onClick={() => setOpenStreamKey(false)}>
+                    Ok
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </>
+        )}
+
         <ul className="flex flex-col flex-grow overflow-y-auto p-2">
           {connectionStatus === "Open" || isLoading ? (
             messageHistory.map((messageData, idx) => (
@@ -225,9 +303,11 @@ export function Chat({
       <AlertDialog open={openDonation}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Send a Donation to {username}</AlertDialogTitle>
+            <AlertDialogTitle>
+              Send a Donation to {host_username}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Show your support to {username} by sending them a donation
+              Show your support to {host_username} by sending them a donation
               <Label className="mt-4">Amount</Label>
               <Input
                 type="text"

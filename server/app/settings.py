@@ -11,22 +11,25 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
-
-from .secrets import KEY
+from pathlib import Path
 from datetime import timedelta
+from dotenv import load_dotenv, find_dotenv
+
+
+# Load .env variables
+load_dotenv(find_dotenv())
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = KEY
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DJANGO_DEBUG")
 
 ALLOWED_HOSTS = ["*"]
 
@@ -205,3 +208,8 @@ CACHES = {
         },
     }
 }
+
+
+# Midtrans Payment Gateway
+
+MIDTRANS_SERVER_KEY = os.environ.get("MIDTRANS_SERVER_KEY")

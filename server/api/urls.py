@@ -4,17 +4,20 @@ from . import views
 
 
 urlpatterns = [
+    # Authentication
     path("register/", views.RegisterView.as_view(), name="register"),
     path("login/", views.CreateTokenView.as_view(), name="token"),
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("logout/", views.LogoutView.as_view(), name="token"),
+    # User Details
     path("user/", views.CurrentUserView.as_view(), name="user"),
     path("user/<str:pk>/", views.RetrieveUserView.as_view(), name="user"),
-    path("streams/", views.CreateStreamView.as_view(), name="new-stream"),
+    # Streams
+    path("streams/", views.CreateStreamView.as_view(), name="create-stream"),
     path(
         "streams/auth/",
         views.StreamAuthView.as_view(),
-        name="start-stream",
+        name="authenticate-stream",
     ),
     path(
         "streams/done/",
@@ -36,6 +39,12 @@ urlpatterns = [
         views.UpdateStreamView.as_view(),
         name="update-stream",
     ),
+    # Donations
+    path(
+        "donations/charge/",
+        views.ChargeDonationView.as_view(),
+        name="charge-donation",
+    ),
     path(
         "donations/create/",
         views.CreateDonationView.as_view(),
@@ -51,6 +60,7 @@ urlpatterns = [
         views.ListDonationView.as_view(),
         name="list-donation",
     ),
+    # Comments
     path(
         "comments/create/",
         views.CreateCommentView.as_view(),

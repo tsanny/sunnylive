@@ -1,14 +1,17 @@
-from .tasks import create_object
-from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect
-from rest_framework import generics, permissions, status
+from django.shortcuts import get_object_or_404
+
+from rest_framework import generics, permissions, status, views
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
+
 from core.models import Stream, Donation, Comment, CustomUser
+
+from .tasks import create_object
 from .utils import send_message_to_channel
+from .midtrans.client import create_transaction, validate_transaction
 from .serializers import (
     UserSerializer,
     AuthTokenSerializer,
@@ -30,7 +33,7 @@ class CreateTokenView(TokenObtainPairView):
     serializer_class = AuthTokenSerializer
 
 
-class CurrentUserView(APIView):
+class CurrentUserView(views.APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request):
@@ -42,7 +45,7 @@ class RetrieveUserView(generics.RetrieveAPIView):
     queryset = CustomUser.objects.all()
 
 
-class LogoutView(APIView):
+class LogoutView(views.APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request):
@@ -93,7 +96,7 @@ class RetrieveStreamKeyView(generics.RetrieveAPIView):
         return self.retrieve(request, *args, **kwargs)
 
 
-class UpdateStreamView(APIView):
+class UpdateStreamView(views.APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request, pk, action):
@@ -124,7 +127,7 @@ class UpdateStreamView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class StreamAuthView(APIView):
+class StreamAuthView(views.APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self, request):
@@ -175,7 +178,7 @@ class StreamAuthView(APIView):
         )
 
 
-class StreamDoneView(APIView):
+class StreamDoneView(views.APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
@@ -197,7 +200,7 @@ class CreateBaseView(generics.CreateAPIView):
                 stream=request.data["stream"],
                 message_type=self.message_type,
                 message=request.data["message"],
-                user=request.user,
+                user=request.data["username"],
                 amount=request.data.get("amount"),
             )
 
@@ -210,9 +213,33 @@ class CreateCommentView(CreateBaseView):
     message_type = "send_message"
 
 
-class CreateDonationView(CreateBaseView):
+class CreateDonationView(generics.CreateAPIView):
     serializer_class = DonationSerializer
-    message_type = "send_donation"
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request, *args, **kwargs):
+        try:
+            data = request.data
+            if validate_transaction(
+                data["order_id"],
+                data["status_code"],
+                data["gross_amount"],
+                data["signature_key"],
+            ):
+                user = CustomUser.objects.get(username=data["username"])
+                send_message_to_channel(
+                    stream=data["stream"],
+                    message_type="send_donation",
+                    message=data["message"],
+                    user=user,
+                    amount=data["gross_amount"],
+                )
+
+                create_object.delay(self.message_type, request.data)
+                return Response(status=status.HTTP_200_OK)
+            return Response("Invalid transaction.", status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class RetrieveDonationView(generics.RetrieveAPIView):
@@ -246,3 +273,17 @@ class ListDonationView(generics.ListAPIView):
             return Donation.objects.filter(stream__id=stream_id, stream__host=user)
         else:
             return Donation.objects.filter(stream__host=user)
+
+
+class ChargeDonationView(views.APIView):
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request):
+        try:
+            return Response(create_transaction(request))
+        except Exception as e:
+            print(e)
+            return Response(
+                "An error has occured while creating the transaction.",
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

@@ -5,9 +5,11 @@ autobahn==23.6.2
 Automat==22.10.0
 billiard==4.2.0
 celery==5.4.0
+certifi==2024.6.2
 cffi==1.16.0
 channels==4.1.0
 channels-redis==4.2.0
+charset-normalizer==3.3.2
 click==8.1.7
 click-didyoumean==0.3.1
 click-plugins==1.1.1
@@ -25,6 +27,7 @@ hyperlink==21.0.0
 idna==3.7
 incremental==22.10.0
 kombu==5.3.7
+midtransclient==1.4.2
 msgpack==1.0.8
 prompt_toolkit==3.0.47
 pyasn1==0.6.0
@@ -35,6 +38,7 @@ pyOpenSSL==24.1.0
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
 redis==5.0.6
+requests==2.32.3
 service-identity==24.1.0
 setuptools==70.1.0
 six==1.16.0
@@ -43,6 +47,7 @@ Twisted==24.3.0
 txaio==23.1.1
 typing_extensions==4.12.2
 tzdata==2024.1
+urllib3==2.2.2
 vine==5.1.0
 wcwidth==0.2.13
 zope.interface==6.4.post2

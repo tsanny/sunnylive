@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const res = await fetch(`${API_URL}/api/donations/create/`, {
+    const res = await fetch(`${API_URL}/api/donations/charge/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

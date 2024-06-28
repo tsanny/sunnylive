@@ -8,6 +8,7 @@ import useSWR from "swr";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { Input } from "./ui/input";
 import useKeypress from "@/hooks/use-key-press";
+import { redirect } from "next/navigation";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,6 +19,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Label } from "@radix-ui/react-dropdown-menu";
+import { toast } from "./ui/use-toast";
 
 type Message = {
   is_donation: boolean;
@@ -53,6 +55,7 @@ export function Chat({
   const [viewers, setViewers] = useState(0);
   const [streamKey, setStreamKey] = useState("");
   const [openDonation, setOpenDonation] = React.useState(false);
+  const [openPaymentDialog, setOpenPaymentDialog] = React.useState(false);
   const [openStreamKey, setOpenStreamKey] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [messageHistory, setMessageHistory] = useState<Message[]>([]);
@@ -108,10 +111,26 @@ export function Chat({
     const amount = Number(donationAmountRef.current?.value.replace(/,/g, ""));
 
     const stream = stream_id;
-    fetch(`/api/donations/`, {
+    const response = await fetch(`/api/donations/`, {
+      method: "POST",
       body: JSON.stringify({ stream, message, amount }),
     });
     handleCloseDonationDialog();
+    if (response.status === 200) {
+      const data = await response.json();
+      window.open(data.redirect_url, "_blank");
+      setOpenPaymentDialog(true);
+      return;
+    }
+    toast({
+      title: `Failed to process your donation :(`,
+      description: (
+        <div>
+          We unfortunately failed to process your donation. Please try again
+          later.
+        </div>
+      ),
+    });
   };
 
   const handleOpenStreamKeyDialog = () => {
@@ -353,6 +372,24 @@ export function Chat({
               onClick={() => handleSendDonation()}
             >
               Send
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <AlertDialog open={openPaymentDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Process Your Payment</AlertDialogTitle>
+            <AlertDialogDescription>
+              You will be redirected to a payment gateway in a new tab. Proceed
+              the donation with your desired payment method. Once the payment
+              has succeeded, The streamer will automatically receive the
+              donation.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setOpenPaymentDialog(false)}>
+              Ok
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

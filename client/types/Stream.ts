@@ -2,8 +2,7 @@ export interface Stream {
   id: string;
   title: string;
   created_at: string;
-  is_started: boolean;
-  is_ended: boolean;
+  is_live: boolean;
   stream_key: string;
   host: string;
 }

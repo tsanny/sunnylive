@@ -117,7 +117,7 @@ export function Navbar() {
             </Link>
             <Link href="/register">
               <button className="text-gray-100 hover:text-white font-bold py-2 px-4 bg-violet-800 hover:bg-violet-700 rounded-sm">
-                Sign up
+                Register
               </button>
             </Link>
           </>

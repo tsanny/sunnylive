@@ -18,6 +18,7 @@ import { toast } from "@/components/ui/use-toast";
 import { useState } from "react";
 
 import { useUser } from "@/context/user.context";
+import { useRouter } from "next/navigation";
 
 const FormSchema = z.object({
   username: z.string(),
@@ -29,6 +30,8 @@ const FormSchema = z.object({
 export function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
@@ -41,9 +44,9 @@ export function LoginForm() {
 
     try {
       const responseData = await login(data.username, data.password);
-
+      router.push("/");
       toast({
-        title: `Hello back ${responseData.user.username}!`,
+        title: `Welcome back ${responseData.user.username}!`,
         description: (
           <div>
             Welcome again to <b>Sunnylive!</b>.
@@ -59,6 +62,7 @@ export function LoginForm() {
 
   return (
     <Form {...form}>
+      <h1 className="text-4xl font-bold">Login to your account</h1>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}

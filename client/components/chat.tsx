@@ -1,4 +1,4 @@
-"use client";
+// "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { getUserAvatar, getUsernameColor } from "@/lib/utils";
 import { Badge } from "./ui/badge";
@@ -36,11 +36,15 @@ export function Chat({
   viewer_username,
   stream_id,
   isStreaming,
+  startStreamHandler,
+  endStreamHandler,
 }: {
   host_username: string;
   viewer_username?: string;
   stream_id: string;
   isStreaming: boolean;
+  startStreamHandler: () => void;
+  endStreamHandler: () => void;
 }) {
   const formatViewers = (viewers: number) => {
     return viewers.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -147,7 +151,7 @@ export function Chat({
 
   return (
     <>
-      <div className="flex-col hidden md:flex min-h-full bg-gray-900 border-l border-gray-800">
+      <div className="flex-col hidden md:flex min-h-full min-w-72 bg-gray-900 border-l border-gray-800">
         <div className="flex flex-row items-center justify-between p-4 border-b border-gray-800">
           <div className="flex flex-row items-center gap-2">
             <Image
@@ -159,7 +163,7 @@ export function Chat({
             />
             <div className="flex flex-col">
               <div className="flex flex-row space-x-2 items-center">
-                <span className="text-sm font-bold">{host_username}</span>
+                <span className="text-sm font-bold pb-1">{host_username}</span>
                 {isStreaming && <Badge variant="destructive">Live</Badge>}
               </div>
               <span className="text-xs text-gray-500 transition-all duration-300">
@@ -172,22 +176,33 @@ export function Chat({
         {host_username === viewer_username && (
           <>
             <div className="flex flex-row items-center justify-between p-4 border-b border-gray-800">
-              <div className="flex justify-between space-x-24">
+              <div className="flex justify-between space-x-2">
                 <button
-                  className="flex flex-row items-center justify-center bg-green-600 text-white px-4 py-1 rounded-md outline-none"
-                  disabled={isAuthenticated}
-                  onClick={() => setOpenDonation(!openDonation)}
-                >
-                  <Icons.play className="pr-1" />
-                  Start
-                </button>
-                <button
-                  className="flex flex-row items-center justify-center bg-zinc-800 text-white px-4 py-1 rounded-md outline-none"
+                  className="flex flex-row items-center justify-center text-gray-100 hover:text-white py-2 px-4 bg-gray-800 hover:bg-gray-700 rounded-sm"
                   disabled={isAuthenticated}
                   onClick={() => handleOpenStreamKeyDialog()}
                 >
                   <Icons.key />
                 </button>
+                {!isStreaming ? (
+                  <button
+                    className="flex flex-row items-center justify-center text-gray-100 hover:text-white py-2 px-4 bg-green-600 hover:bg-green-500 rounded-sm"
+                    disabled={isAuthenticated}
+                    onClick={() => startStreamHandler()}
+                  >
+                    <Icons.play className="pr-2" />
+                    Start
+                  </button>
+                ) : (
+                  <button
+                    className="flex flex-row items-center justify-center text-gray-100 hover:text-white py-2 px-4 bg-red-600 hover:bg-red-500 rounded-sm"
+                    disabled={isAuthenticated}
+                    onClick={() => endStreamHandler()}
+                  >
+                    <Icons.stop className="pr-2" />
+                    End
+                  </button>
+                )}
               </div>
             </div>
             <AlertDialog open={openStreamKey}>
@@ -276,22 +291,24 @@ export function Chat({
             </span>
           )}
         </ul>
-        <div className="flex flex-col items-center justify-between gap-2 p-4 border-t border-gray-800 w-max-[120px]">
+        <div className="flex flex-col items-end justify-between gap-2 p-4 border-t border-gray-800 w-max-[120px]">
           <Input
             placeholder="Type message"
             disabled={isAuthenticated}
             ref={messageRef}
           />
-          <div className="flex justify-between space-x-24">
+          <div className="flex justify-between space-x-2">
+            {host_username !== viewer_username && (
+              <button
+                className="text-gray-100 hover:text-white py-2 px-4 bg-gray-800 hover:bg-gray-700 rounded-sm"
+                disabled={isAuthenticated}
+                onClick={() => setOpenDonation(!openDonation)}
+              >
+                $
+              </button>
+            )}
             <button
-              className="flex flex-row items-center justify-center bg-green-600 text-white px-4 py-1 rounded-md outline-none"
-              disabled={isAuthenticated}
-              onClick={() => setOpenDonation(!openDonation)}
-            >
-              $
-            </button>
-            <button
-              className="flex flex-row items-center justify-center bg-purple-600 text-white px-4 py-1 rounded-md outline-none"
+              className="text-gray-100 hover:text-white py-2 px-4 bg-violet-800 hover:bg-violet-700 rounded-sm"
               disabled={isAuthenticated}
               onClick={() => handleSendMessage()}
             >
@@ -325,11 +342,14 @@ export function Chat({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction onClick={() => handleCloseDonationDialog()}>
+            <AlertDialogAction
+              onClick={() => handleCloseDonationDialog()}
+              className="text-gray-100 hover:text-white py-2 px-4 bg-gray-800 hover:bg-gray-700 rounded-sm"
+            >
               Cancel
             </AlertDialogAction>
             <AlertDialogAction
-              className="bg-purple-600 text-white"
+              className="text-gray-100 hover:text-white py-2 px-4 bg-violet-800 hover:bg-violet-700 rounded-sm"
               onClick={() => handleSendDonation()}
             >
               Send

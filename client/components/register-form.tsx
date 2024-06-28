@@ -20,6 +20,7 @@ import { useState } from "react";
 
 import { useUser } from "@/context/user.context";
 import { User } from "@/types/User";
+import { useRouter } from "next/navigation";
 
 const FormSchema = z
   .object({
@@ -48,6 +49,7 @@ const FormSchema = z
 export function RegisterForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
@@ -70,7 +72,7 @@ export function RegisterForm() {
         };
       };
       const responseData = response.data;
-
+      router.push("/login");
       toast({
         title: `Hello ${responseData.user.username}!`,
         description: (
@@ -89,6 +91,7 @@ export function RegisterForm() {
 
   return (
     <Form {...form}>
+      <h1 className="text-4xl font-bold">Register an account</h1>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}

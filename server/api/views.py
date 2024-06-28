@@ -104,14 +104,11 @@ class UpdateStreamView(APIView):
                 {"message": "You do not have permission to modify this stream."},
                 status=status.HTTP_403_FORBIDDEN,
             )
-
         if action == "start":
-            stream.is_started = True
-            stream.is_ended = False
+            stream.is_live = True
             message = "Stream started successfully."
         elif action == "end":
-            stream.is_started = False
-            stream.is_ended = True
+            stream.is_live = False
             message = "Stream ended successfully."
         else:
             return Response(
@@ -138,7 +135,7 @@ class StreamAuthView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         stream = get_object_or_404(Stream, pk=stream_id)
-        if stream.is_started and not stream.is_ended:
+        if stream.is_live:
             return Response(status=status.HTTP_200_OK)
         return Response(status=status.HTTP_403_FORBIDDEN)
 

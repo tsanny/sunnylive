@@ -18,8 +18,7 @@ class Stream(models.Model):
     host = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     title = models.CharField(max_length=128)
     created_at = models.DateTimeField(auto_now_add=True)
-    is_started = models.BooleanField(default=False)
-    is_ended = models.BooleanField(default=False)
+    is_live = models.BooleanField(default=False)
     stream_key = models.CharField(
         _("Stream key"),
         max_length=16,

@@ -61,7 +61,7 @@ class CommentConsumer(AsyncWebsocketConsumer):
         stream = Stream.objects.get(pk=stream_id)
         if stream is None:
             return False
-        if stream.is_ended or not stream.is_started:
+        if not stream.is_live:
             return False
         return True
 

@@ -35,28 +35,22 @@ export async function POST(request: NextRequest) {
           ...body.metadata,
         }),
       });
-
-      if (!res.ok) {
+      if (res.ok) {
+        console.log("Forwarding information to the API.");
+      } else {
         const data = await res.json();
         const errorMessage = data.non_field_errors
           ? data.non_field_errors[0]
           : "An error occurred";
-
-        return NextResponse.json(
-          { error: errorMessage },
-          { status: res.status },
+        console.log(
+          `The API has encountered an internal error while processing the information:\n\n${errorMessage}`,
         );
       }
-
-      const data = await res.json();
-
-      return NextResponse.json({ ...data }, { status: res.status });
     } catch (error) {
-      throw error;
-      return NextResponse.json({ error: "An error occurred" }, { status: 500 });
+      console.log(
+        "An error has occured while sending donation information to the API.",
+      );
     }
   }
-  return NextResponse.json({ body }, { status: 200 });
-
-  return NextResponse.json({ error: "An error occurred" }, { status: 500 });
+  return NextResponse.json({ status: 200 });
 }

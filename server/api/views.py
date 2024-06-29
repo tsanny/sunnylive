@@ -182,10 +182,7 @@ class StreamDoneView(views.APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
-        data = request.data
-
         print("RTMP Stream stopped successfully.")
-        print(data)
         return Response(status=status.HTTP_200_OK)
 
 
@@ -204,28 +201,36 @@ class CreateDonationView(generics.CreateAPIView):
     def post(self, request, *args, **kwargs):
         try:
             data = request.data
+            stream = data["stream"]
+            message = data["message"]
+            order_id = data["order_id"]
+            status_code = data["status_code"]
+            amount = data["gross_amount"]
+            signature = data["signature_key"]
+
             if validate_transaction(
-                data["order_id"],
-                data["status_code"],
-                data["gross_amount"],
-                data["signature_key"],
+                order_id,
+                status_code,
+                amount,
+                signature,
             ):
                 user = CustomUser.objects.get(username=data["username"])
-
                 send_message_to_channel(
-                    stream=data["stream"],
-                    message_type="send_donation",
-                    message=data["message"],
-                    user=user,
-                    amount=data["gross_amount"],
+                    stream,
+                    "send_donation",
+                    message,
+                    user,
+                    amount,
                 )
-                donation_data = {
-                    "stream": data["stream"],
-                    "message": data["message"],
-                    "user": str(user.pk),
-                    "amount": data["gross_amount"],
-                }
-                create_object.delay("send_donation", donation_data)
+                create_object.delay(
+                    "send_donation",
+                    {
+                        "stream": stream,
+                        "message": message,
+                        "user": str(user.pk),
+                        "amount": amount,
+                    },
+                )
                 return Response(
                     {"detail": "Donation received successfully"},
                     status=status.HTTP_201_CREATED,
@@ -275,8 +280,10 @@ class ChargeDonationView(views.APIView):
         try:
             return Response(create_transaction(request))
         except Exception as e:
-            print(e)
             return Response(
-                "An error has occured while creating the transaction.",
+                {
+                    "message": "An error has occured while creating the transaction.",
+                    "error": type(e),
+                },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )

@@ -11,6 +11,8 @@ def generate_stream_key():
 
 class CustomUser(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    # balance to store the amount of donations received
+    balance = models.DecimalField(default=0, max_digits=9, decimal_places=2)
 
 
 class Stream(models.Model):
@@ -55,3 +57,10 @@ class Donation(Comment):
     def __str__(self):
         return f'{self.user} donated {self.amount}: "{self.message}" \
                 ({self.stream})'
+
+    def save(self, *args, **kwargs):
+        user = CustomUser.objects.get(pk=self.stream.host.pk)
+        user.balance += self.amount
+        user.save()
+
+        super(Donation, self).save(*args, **kwargs)

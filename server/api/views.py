@@ -227,6 +227,7 @@ class CreateDonationView(generics.CreateAPIView):
                 data["signature_key"],
             ):
                 user = CustomUser.objects.get(username=data["username"])
+
                 send_message_to_channel(
                     stream=data["stream"],
                     message_type="send_donation",
@@ -234,12 +235,17 @@ class CreateDonationView(generics.CreateAPIView):
                     user=user,
                     amount=data["gross_amount"],
                 )
-
-                create_object.delay(self.message_type, request.data)
-                return Response(status=status.HTTP_200_OK)
+                donation_data = {
+                    "stream": data["stream"],
+                    "message": data["message"],
+                    "user": str(user.pk),
+                    "amount": data["gross_amount"],
+                }
+                create_object.delay("send_donation", donation_data)
+                return Response(status=status.HTTP_201_CREATED)
             return Response("Invalid transaction.", status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(type(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class RetrieveDonationView(generics.RetrieveAPIView):

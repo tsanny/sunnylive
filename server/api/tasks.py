@@ -8,6 +8,6 @@ def create_object(message_type, data):
         serializer = CommentSerializer(data=data)
     elif message_type == "send_donation":
         serializer = DonationSerializer(data=data)
-    if serializer.is_valid():
+    if serializer.is_valid(raise_exception=True):
         serializer.save()
         return serializer.data

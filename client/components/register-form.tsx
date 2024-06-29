@@ -113,7 +113,11 @@ export function RegisterForm() {
             <FormItem>
               <FormLabel>Username</FormLabel>
               <FormControl>
-                <Input placeholder="sunny32" {...field} className="lowercase" />
+                <Input
+                  placeholder="Username"
+                  {...field}
+                  className="lowercase"
+                />
               </FormControl>
               <FormDescription>
                 This is your public display name. You won&apos;t be able to

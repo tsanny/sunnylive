@@ -6,6 +6,7 @@ import {
   StopCircle,
   KeyIcon,
   User,
+  CheckCircleIcon,
   type Icon as LucideIcon,
 } from "lucide-react";
 
@@ -19,4 +20,5 @@ export const Icons = {
   Stop: StopCircle,
   Key: KeyIcon,
   User: User,
+  Check: CheckCircleIcon,
 };

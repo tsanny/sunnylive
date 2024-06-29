@@ -15,9 +15,9 @@ export async function POST(request: NextRequest) {
 
     if (!res.ok) {
       const data = await res.json();
-      const errorMessage = data.non_field_errors
-        ? data.non_field_errors[0]
-        : "An error occurred";
+      const errorMessage = data.detail
+        ? data.detail + ". Please check your username and password"
+        : "An error has occurred";
 
       return NextResponse.json({ error: errorMessage }, { status: res.status });
     }

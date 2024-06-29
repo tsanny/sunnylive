@@ -1,5 +1,7 @@
 # Livestream App
 
+This is a demonstration of a simple livestreaming app that features a donation system. Users can watch a video livestream in real-time or host their own. Viewers can donate and give comments to the streamer and other viewers. The donation system implemented in this project utilizes the Midtrans Payment Gateway.
+
 # Table of Contents
 
 1. [Technologies used](#tech)

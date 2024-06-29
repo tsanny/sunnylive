@@ -31,8 +31,6 @@ export async function GET(request: NextRequest) {
   const data = await res.json();
 
   if (!res.ok) {
-    // TODO: add checks for other errors
-    console.log(data);
     if (data.non_field_errors) {
       return NextResponse.json(
         {

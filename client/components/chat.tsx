@@ -1,14 +1,15 @@
 // "use client";
 import React, { useState, useEffect, useRef } from "react";
-import { getUserAvatar, getUsernameColor } from "@/lib/utils";
-import { Badge } from "./ui/badge";
 import Image from "next/image";
-import { Icons } from "@/components/icons";
 import useSWR from "swr";
 import useWebSocket, { ReadyState } from "react-use-websocket";
-import { Input } from "./ui/input";
 import useKeypress from "@/hooks/use-key-press";
-import { redirect } from "next/navigation";
+import { toast } from "./ui/use-toast";
+import { getUserAvatar, getUsernameColor } from "@/lib/utils";
+import { Badge } from "./ui/badge";
+import { Icons } from "@/components/icons";
+import { Input } from "./ui/input";
+import { Label } from "@radix-ui/react-dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,8 +19,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Label } from "@radix-ui/react-dropdown-menu";
-import { toast } from "./ui/use-toast";
 
 type Message = {
   is_donation: boolean;
@@ -41,10 +40,10 @@ export function Chat({
   startStreamHandler,
   endStreamHandler,
 }: {
-  host_username: string;
-  viewer_username?: string;
-  stream_id: string;
-  isStreaming: boolean;
+  host_username: Readonly<string>;
+  viewer_username?: Readonly<string>;
+  stream_id: Readonly<string>;
+  isStreaming: Readonly<boolean>;
   startStreamHandler: () => void;
   endStreamHandler: () => void;
 }) {
@@ -84,8 +83,11 @@ export function Chat({
 
   const { data, error, isLoading } = useSWR("/api/refresh-token/", fetcher);
 
+  const webSocketPath = data?.data?.access
+    ? `/?token=${data?.data?.access}`
+    : "/";
   const { sendMessage, readyState, lastMessage } = useWebSocket(
-    `ws://127.0.0.1:8000/comment/${stream_id}${data?.data?.access ? `/?token=${data?.data?.access}` : "/"}`,
+    `ws://127.0.0.1:8000/comment/${stream_id}${webSocketPath}`,
   );
   useKeypress("Enter", () => handleSendMessage());
 
@@ -201,7 +203,7 @@ export function Chat({
                   disabled={isAuthenticated}
                   onClick={() => handleOpenStreamKeyDialog()}
                 >
-                  <Icons.key />
+                  <Icons.Key />
                 </button>
                 {!isStreaming ? (
                   <button
@@ -209,7 +211,7 @@ export function Chat({
                     disabled={isAuthenticated}
                     onClick={() => startStreamHandler()}
                   >
-                    <Icons.play className="pr-2" />
+                    <Icons.Play className="pr-2" />
                     Start
                   </button>
                 ) : (
@@ -218,7 +220,7 @@ export function Chat({
                     disabled={isAuthenticated}
                     onClick={() => endStreamHandler()}
                   >
-                    <Icons.stop className="pr-2" />
+                    <Icons.Stop className="pr-2" />
                     End
                   </button>
                 )}

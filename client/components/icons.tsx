@@ -12,11 +12,11 @@ import {
 export type Icon = LucideIcon;
 
 export const Icons = {
-  sun: SunMedium,
-  moon: Moon,
-  logo: Tv,
-  play: PlayCircle,
-  stop: StopCircle,
-  key: KeyIcon,
-  user: User,
+  Sun: SunMedium,
+  Moon: Moon,
+  Logo: Tv,
+  Play: PlayCircle,
+  Stop: StopCircle,
+  Key: KeyIcon,
+  User: User,
 };

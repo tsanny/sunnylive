@@ -32,7 +32,7 @@ export function useUser() {
   return context;
 }
 
-export function UserProvider({ children }: { children: ReactNode }) {
+export function UserProvider({ children }: { children: Readonly<ReactNode> }) {
   const [user, setUser] = useState<User | null>(null);
 
   const fetchCurrentUser = async () => {

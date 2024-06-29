@@ -1,24 +1,13 @@
 "use client";
-import React, { useEffect, useRef } from "react";
-import {
-  Play,
-  Pause,
-  Volume2,
-  Share2,
-  MoreHorizontal,
-  Heart,
-  Maximize,
-  Cog,
-  Settings,
-} from "lucide-react";
+import React, { useRef } from "react";
 import HlsPlayer from "react-hls-player";
 
 export function VideoPlayer({
   stream_id,
   isStreaming,
 }: {
-  stream_id: string;
-  isStreaming: boolean;
+  stream_id: Readonly<string>;
+  isStreaming: Readonly<boolean>;
 }) {
   const playerRef = useRef<HTMLVideoElement>(null);
 

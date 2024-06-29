@@ -9,7 +9,7 @@ export default function Page({
   params,
 }: {
   params: {
-    stream_id: string;
+    stream_id: Readonly<string>;
   };
 }) {
   let stream_id = decodeURIComponent(params.stream_id);

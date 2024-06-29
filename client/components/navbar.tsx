@@ -21,7 +21,6 @@ import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogContent,
-  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
@@ -29,8 +28,6 @@ import {
 
 import { LogOut, User } from "lucide-react";
 import { getUserAvatar } from "@/lib/utils";
-import { Label } from "@radix-ui/react-dropdown-menu";
-import { Input } from "./ui/input";
 
 export function Navbar() {
   const { user, logout } = useUser();
@@ -39,7 +36,7 @@ export function Navbar() {
   return (
     <nav className="sticky flex gap-6 md:gap-10 p-4 justify-between z-50">
       <Link href="/" className="flex items-center space-x-2">
-        <Icons.logo className="h-6 w-6" />
+        <Icons.Logo className="h-6 w-6" />
         <span className="inline-block font-bold">{siteConfig.name}</span>
       </Link>
       <SearchBar />

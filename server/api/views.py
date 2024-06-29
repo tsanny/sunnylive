@@ -152,9 +152,10 @@ class StreamAuthView(views.APIView):
         if addr == "127.0.0.1" and flashver == "LNX.11,1,102,55":
             return Response(status=status.HTTP_200_OK)
 
+        auth_failed_message = "Stream authorization failed"
         if not call or call != "publish" or not stream_key:
             return Response(
-                {"message": "Stream authorization failed"},
+                {"message": auth_failed_message},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
@@ -162,12 +163,12 @@ class StreamAuthView(views.APIView):
             stream = Stream.objects.get(stream_key=stream_key)
             if not stream:
                 return Response(
-                    {"message": "Stream authorization failed"},
+                    {"message": auth_failed_message},
                     status=status.HTTP_403_FORBIDDEN,
                 )
         except Stream.DoesNotExist:
             return Response(
-                {"message": "Stream authorization failed"},
+                {"message": auth_failed_message},
                 status=status.HTTP_403_FORBIDDEN,
             )
 

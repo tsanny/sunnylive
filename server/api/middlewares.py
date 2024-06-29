@@ -57,5 +57,5 @@ class JwtAuthMiddleware(BaseMiddleware):
         return await super().__call__(scope, receive, send)
 
 
-def JwtAuthMiddlewareStack(inner):
+def jwtAuthMiddlewareStack(inner):
     return JwtAuthMiddleware(AuthMiddlewareStack(inner))

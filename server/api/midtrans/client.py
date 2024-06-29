@@ -29,9 +29,9 @@ def create_transaction(request):
 
 
 def validate_transaction(order_id, status_code, gross_amount, signature_key):
-    hash = hashlib.sha512(
+    hashed_data = hashlib.sha512(
         (order_id + status_code + gross_amount + settings.MIDTRANS_SERVER_KEY).encode(
             "utf-8"
         )
     ).hexdigest()
-    return hash == signature_key
+    return hashed_data == signature_key

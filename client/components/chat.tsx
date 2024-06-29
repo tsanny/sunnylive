@@ -126,7 +126,7 @@ export function Chat({
       title: `Failed to process your donation :(`,
       description: (
         <div>
-          We unfortunately failed to process your donation. Please try again
+          We unfortunately could not process your donation. Please try again
           later.
         </div>
       ),
@@ -170,7 +170,7 @@ export function Chat({
 
   return (
     <>
-      <div className="flex-col hidden md:flex min-h-full min-w-72 bg-gray-900 border-l border-gray-800">
+      <div className="flex-col hidden md:flex min-h-full max-h-screen min-w-72 bg-gray-900 border-l border-gray-800">
         <div className="flex flex-row items-center justify-between p-4 border-b border-gray-800">
           <div className="flex flex-row items-center gap-2">
             <Image
@@ -254,8 +254,7 @@ export function Chat({
             </AlertDialog>
           </>
         )}
-
-        <ul className="flex flex-col flex-grow overflow-y-auto p-2">
+        <ul className="flex flex-col flex-grow p-2 overflow-y-auto justify-end">
           {connectionStatus === "Open" || isLoading ? (
             messageHistory.map((messageData, idx) => (
               <li

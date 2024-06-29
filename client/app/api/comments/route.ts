@@ -31,7 +31,6 @@ export async function POST(request: NextRequest) {
       const errorMessage = data.non_field_errors
         ? data.non_field_errors[0]
         : "An error occurred";
-
       return NextResponse.json({ error: errorMessage }, { status: res.status });
     }
 
@@ -39,6 +38,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ ...data }, { status: res.status });
   } catch (error) {
+    console.log(error);
     return NextResponse.json({ error: "An error occurred" }, { status: 500 });
   }
 }

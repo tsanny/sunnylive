@@ -189,32 +189,16 @@ class StreamDoneView(views.APIView):
         return Response(status=status.HTTP_200_OK)
 
 
-class CreateBaseView(generics.CreateAPIView):
+class CreateCommentView(generics.CreateAPIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request, *args, **kwargs):
         request.data["user"] = request.user.pk
-
-        if self.message_type == "send_donation":
-            send_message_to_channel(
-                stream=request.data["stream"],
-                message_type=self.message_type,
-                message=request.data["message"],
-                user=request.data["username"],
-                amount=request.data.get("amount"),
-            )
-
-        create_object.delay(self.message_type, request.data)
-        return Response(status=status.HTTP_200_OK)
-
-
-class CreateCommentView(CreateBaseView):
-    serializer_class = CommentSerializer
-    message_type = "send_message"
+        create_object.delay("send_message", request.data)
+        return Response("Comment received successfully", status=status.HTTP_201_CREATED)
 
 
 class CreateDonationView(generics.CreateAPIView):
-    serializer_class = DonationSerializer
     permission_classes = (permissions.AllowAny,)
 
     def post(self, request, *args, **kwargs):
@@ -242,7 +226,10 @@ class CreateDonationView(generics.CreateAPIView):
                     "amount": data["gross_amount"],
                 }
                 create_object.delay("send_donation", donation_data)
-                return Response(status=status.HTTP_201_CREATED)
+                return Response(
+                    {"detail": "Donation received successfully"},
+                    status=status.HTTP_201_CREATED,
+                )
             return Response("Invalid transaction.", status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response(type(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)

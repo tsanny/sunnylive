@@ -28,17 +28,16 @@ This is a demonstration of a simple livestreaming app that features a donation s
 <a name="architecture"></a>
 ## Software Architecture
 
-![[SoftwareArchitecture.png]]
-
+![Software Architecture](SoftwareArchitecture.png?raw=true "Software Architecture")
 <a name="usecase"></a>
 ## Use Case Diagram
 
-![[UCD.png]]
+![Use Case Diagram](UCD.png?raw=true "Use Case Diagram")
 
 <a name="class"></a>
 ## Database Class Diagram
 
-![[DatabaseCD.png]]
+![Database Class Diagram](DatabaseCD.png?raw=true "Database Class Diagram")
 <a name="structure"></a>
 
 ## Project Structure
@@ -193,7 +192,7 @@ sudo systemctl reload nginx
 ## Payment Gateway Integration
 
 ###### Donation Sequence Diagram
-![[DonationSD.png]]
+![Donation Sequence Diagram](DonationSD.png?raw=true "Donation Sequence Diagram")
 
 This application integrates Snap, Midtrans's Payment API that includes a prebuilt hosted checkout page to help process donations. Midtrans provides sandbox environment as well as a payment simulator to help testing and development. All transaction made within this environment is not "real", and does not require "real payment/fund". This environment is created automatically when you sign up and is free to use.
 ###### Steps to test the payments integration locally

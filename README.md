@@ -1,6 +1,6 @@
-# Livestream App
+# Sunnylive Livestreaming App
 
-This is a demonstration of a simple livestreaming app that features a donation system. Users can watch a video livestream in real-time or host their own. Viewers can donate and give comments to the streamer and other viewers. The donation system implemented in this project utilizes the Midtrans payment gateway.
+Sunnylive is a demonstration of a simple livestreaming app that features a donation system. Users can watch a video livestream in real-time or host their own. Viewers can donate and give comments to the streamer and other viewers. The donation system implemented in this project utilizes the Midtrans payment gateway.
 
 ## Table of Contents
 
@@ -8,9 +8,9 @@ This is a demonstration of a simple livestreaming app that features a donation s
 2. [Software architecture](#architecture)
 3. [Use case diagram](#usecase)
 4. [Database class diagram](#class)
-6. [Project structure](#structure)
-7. [How to run this project locally](#run)
-8. [Payment gateway integration](#payment)
+5. [Project structure](#structure)
+6. [How to run this project locally](#run)
+7. [Payment gateway integration](#payment)
 
 <a name="tech"></a>
 ## Technologies Used
@@ -142,19 +142,19 @@ server
 ```
 python -m venv env
 ```
-4. Activate the virtual environment:
+3. Activate the virtual environment:
 ```
 source env/bin/activate
 ```
-6. Install the required libraries specified in the requirements.txt file:
+4. Install the required libraries specified in the requirements.txt file:
 ```
 pip install -r requirements.txt
 ```
-8. Run the migrations:
+5. Run the migrations:
 ```
 python manage.py migrate
 ```
-10. Finally, run the server:
+6. Finally, run the server:
 ```
 python manage.py runserver
 ```
@@ -171,8 +171,8 @@ celery -A app worker -l INFO
 ```
 yarn
 ```
-4. Install the [CORS Chrome Extension](https://chrome.google.com/webstore/detail/allow-cors-access-control/lhobafahddgcelffkeicbaginigeejlf)
-5. And finally, run the app:
+3. Install the [CORS Chrome Extension](https://chrome.google.com/webstore/detail/allow-cors-access-control/lhobafahddgcelffkeicbaginigeejlf)
+4. And finally, run the app:
 ```
 yarn dev
 ```
@@ -183,7 +183,7 @@ yarn dev
 ```
 cp nginx.conf /etc/nginx/nginx.conf
 ```
-4. Reload the Nginx service:
+3. Reload the Nginx service:
 ```
 sudo systemctl reload nginx
 ```

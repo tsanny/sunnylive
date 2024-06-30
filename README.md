@@ -158,7 +158,7 @@ python manage.py migrate
 ```
 python manage.py runserver
 ```
-###### Starting the Celery task queue worker
+#### Starting the Celery task queue worker
 1. Open a new terminal, and activate the virtual environment
 2. Start the worker process:
 ```
@@ -191,12 +191,12 @@ sudo systemctl reload nginx
 <a name="payment"></a>
 ## Payment Gateway Integration
 
-###### Donation Sequence Diagram
+##### Donation Sequence Diagram
 ![Donation Sequence Diagram](DonationSD.png?raw=true "Donation Sequence Diagram")
 
-This application integrates Snap, Midtrans's Payment API that includes a prebuilt hosted checkout page to help process donations. Midtrans provides sandbox environment as well as a payment simulator to help testing and development. All transaction made within this environment is not "real", and does not require "real payment/fund". This environment is created automatically when you sign up and is free to use.
-###### Steps to test the payments integration locally
-To utilize Midtrans' notification handler on localhost, you can utilize the services such as [Ngrok](https://ngrok.com/), to expose your localhost server to public Internet. Once you have obtained the Internet accessible URL, you can add it to the _Notification URL_ field on _Dashboard_.
+This application integrates Snap, Midtrans's Payment API that includes a prebuilt hosted checkout page to help process donations. Midtrans provides sandbox environment as well as a [payment simulator](https://simulator.sandbox.midtrans.com/) to help testing and development. All transaction made within this environment is not "real", and does not require "real payment/fund". This environment is created automatically when you sign up and is free to use.
+### Steps to locally integrate the payments gateway
+To utilize Midtrans' notification handler on localhost, you can utilize the services such as [Ngrok](https://ngrok.com/) to expose your localhost server to public Internet. Once you have obtained the Internet accessible URL, you can add it to the _Notification URL_ field on _Dashboard_.
 1. Install Ngrok on your computer and sign up for an ngrok account to obtain your auth token.
 2. Run the following command in your terminal to install the authtoken and connect the ngrok agent to your account.
 ```

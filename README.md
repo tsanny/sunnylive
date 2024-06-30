@@ -179,7 +179,7 @@ yarn dev
 
 ### Streaming Server
 1. Change directory to `/nginx`
-2. Copy the contents of `nginx.conf` to the The global nginx configuration file located at `/etc/nginx/nginx.conf`:
+2. Copy the contents of `nginx.conf` to the global nginx configuration file located at `/etc/nginx/nginx.conf`:
 ```
 cp nginx.conf /etc/nginx/nginx.conf
 ```

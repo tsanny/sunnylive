@@ -212,4 +212,4 @@ ngrok http 3000
 7. Head to Settings > Payment > Finish Redirect URL
 8. Add `https://FORWARDING-URL.ngrok-free.app/success` as the finish redirect URL endpoint and click Save.
 9. Head to Settings > Payment > Notification URL
-10. Add `https://FORWARDING-URL.ngrok-free.app/api/donations/webhook` as the ###### payment notification URL endpoint and click Save.
+10. Add `https://FORWARDING-URL.ngrok-free.app/api/donations/webhook` as the payment notification URL endpoint and click Save.

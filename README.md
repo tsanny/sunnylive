@@ -1,8 +1,8 @@
 # Livestream App
 
-This is a demonstration of a simple livestreaming app that features a donation system. Users can watch a video livestream in real-time or host their own. Viewers can donate and give comments to the streamer and other viewers. The donation system implemented in this project utilizes the Midtrans Payment Gateway.
+This is a demonstration of a simple livestreaming app that features a donation system. Users can watch a video livestream in real-time or host their own. Viewers can donate and give comments to the streamer and other viewers. The donation system implemented in this project utilizes the Midtrans payment gateway.
 
-# Table of Contents
+## Table of Contents
 
 1. [Technologies used](#tech)
 2. [Project structure](#structure)
@@ -10,7 +10,7 @@ This is a demonstration of a simple livestreaming app that features a donation s
 
 <a name="tech"></a>
 
-# Technologies Used
+## Technologies Used
 
     - Frontend: Next.js
     - Backend: Django REST Framework
@@ -24,9 +24,9 @@ This is a demonstration of a simple livestreaming app that features a donation s
 
 <a name="structure"></a>
 
-# Project Structure
+## Project Structure
 
-## Client
+### Client
 
 ```
 client
@@ -76,7 +76,7 @@ client
     └── User.ts
 ```
 
-## Server
+### Server
 
 ```
 server
@@ -111,9 +111,9 @@ server
 
 <a name="run"></a>
 
-# How to run this project
+## How to run this project
 
-## Server
+### Server
 
 1. You'll need Python installed on your computer
 2. Create a new Python project on your machine
@@ -121,7 +121,7 @@ server
 4. Type the following commands `python manage.py makemigrations` and `python manage.py migrate`
 5. Make sure to run your server with `python manage.py runserver`
 
-## Client
+### Client
 
 1. For this, you'll need Node.js installed on your computer
 2. Install the required libraries with `yarn`

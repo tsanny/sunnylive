@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { refreshToken } from "../../../refresh-token/route";
+import { refreshToken } from "../../../refresh-token/refresh";
 
 export async function GET(
   request: NextRequest,
